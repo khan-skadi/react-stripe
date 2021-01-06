@@ -1,0 +1,17 @@
+.form--wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-direction: column;
+  width: 100%;
+}
+
+.charge--button {
+  margin: 10px 0;
+  width: 150px;
+  height: 35px;
+  background: lightblue;
+  border: none;
+  outline: auto;
+}

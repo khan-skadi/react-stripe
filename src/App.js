@@ -1,25 +1,24 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import CardSetupForm from './components/CardSetupForm';
 
-function App() {
+const stripePromise = loadStripe(
+  'pk_test_51Hn4kXJbKhjF9mBLMk7eGbSMXNcxyIyEURgIDSgL3RDCkkr969Sifm8OSRzNnwsXiNI5H5AYAHQNdsuxqMblrYHE00zU6eghjV'
+);
+
+// pass client secret to client
+// collect payment details on client
+// submit the card details to stripe from the client
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="wrapper">
+      <Elements stripe={stripePromise}>
+        <CardSetupForm />
+      </Elements>
     </div>
   );
-}
+};
 
 export default App;
