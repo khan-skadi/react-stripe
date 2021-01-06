@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
-import './CardSetupForm.css';
+import axios from 'axios';
 import SaveCard from './SaveCard';
+import './CardSetupForm.css';
 
 export default function CardSetupForm() {
   const stripe = useStripe();
@@ -60,7 +60,9 @@ export default function CardSetupForm() {
   return (
     <form onSubmit={handleSubmit} className="form--wrapper">
       <SaveCard />
-      <button className="charge--button" disabled={!stripe}>Charge Card</button>
+      <button className="charge--button" disabled={!stripe}>
+        Charge Card
+      </button>
     </form>
   );
 }
