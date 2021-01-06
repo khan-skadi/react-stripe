@@ -41,7 +41,7 @@ export default function CardSetupForm() {
       payment_method: {
         card: elements.getElement(CardElement),
         billing_details: {
-          name: 'Jenny Rosen'
+          name: 'Jenny Rosen' // add billing details for the client.
         }
       }
     });
