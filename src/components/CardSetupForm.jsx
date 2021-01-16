@@ -4,12 +4,15 @@ import axios from 'axios';
 import SaveCard from './SaveCard';
 import './CardSetupForm.css';
 
+export const url =
+  'http://localhost:5001/justdelvr-mobile-application-1/us-central1/api';
+
 export default function CardSetupForm() {
   const stripe = useStripe();
   const elements = useElements();
   const [fetchedSecret, setFetchedSecret] = useState('');
   const [customerId, setCustomerId] = useState('');
-  const [paymentIntent, setPaymentIntent] = useState(null);
+  const [paymentIntent, setPaymentIntent] = useState(null); //eslint-disable-line
   const [account, setAccount] = useState(null);
   const [verificationLink, setVerificationLink] = useState(null);
   const [paymentIntentId, setPaymentIntentId] = useState('');
@@ -27,9 +30,7 @@ export default function CardSetupForm() {
       data: {
         data: { client_secret, customerId }
       }
-    } = await axios.get(
-      'http://localhost:3001/api/payments/create-setup-intent'
-    );
+    } = await axios.get(`${url}/payments/create-setup-intent`);
     setCustomerId(customerId); // user's customer id
 
     return client_secret;
@@ -66,12 +67,20 @@ export default function CardSetupForm() {
       const {
         data: { data }
       } = await axios.post(
-        'http://localhost:3001/api/payments/create-payment-intent',
+        `${url}/payments/create-payment-intent`,
         {
           ...paymentIntentRequest
         }
       );
       console.log('CREATE PAYMENT AND HOLD FUNDS: ', data);
+
+      const stripeCardId = data.paymentIntent.payment_method;
+      const stripeCardLast4 = data.paymentIntent.charges.data[0].payment_method_details.card.last4;
+      const stripeCustomerId = data.paymentIntent.customer;
+      console.log('stripeCardId: ', stripeCardId);
+      console.log('stripeCardLast4: ', stripeCardLast4);
+      console.log('stripeCustomerId: ', stripeCustomerId);
+      
       setPaymentIntent(data.paymentIntent);
       setPaymentIntentId(data.returnData.id);
     }
@@ -82,7 +91,7 @@ export default function CardSetupForm() {
     console.log('paymentIntentId: ', paymentIntentId);
     const {
       data: { data }
-    } = await axios.post('http://localhost:3001/api/payments/capture-payment', {
+    } = await axios.post(`${url}/payments/capture-payment`, {
       connectedAccountId: account.id,
       paymentIntentId: paymentIntentId,
       amount: 60
@@ -115,7 +124,7 @@ export default function CardSetupForm() {
     const {
       data: { data }
     } = await axios.post(
-      'http://localhost:3001/api/payments/create-individual-account',
+      `${url}/payments/create-individual-account`,
       {
         email: individualAccountParams.email,
         individual: individualAccountParams
@@ -128,7 +137,7 @@ export default function CardSetupForm() {
     const {
       data: { data }
     } = await axios.get(
-      'http://localhost:3001/api/payments/create-account-links',
+      `${url}/payments/create-account-links`,
       {
         params: {
           accountId: account.id
@@ -142,7 +151,7 @@ export default function CardSetupForm() {
   const handleRetrieveAccount = async () => {
     const {
       data: { data }
-    } = await axios.get('http://localhost:3001/api/payments/retrieve-account', {
+    } = await axios.get(`${url}/payments/retrieve-account`, {
       params: {
         accountId: account.id
       }

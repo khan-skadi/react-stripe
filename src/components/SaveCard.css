@@ -24,14 +24,14 @@
   background-color: #fefde5 !important;
 }
 
-.wrapper {
+/* .wrapper {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
   width: 50%;
-}
+} */
 
-.card--wrapper {
+/* .card--wrapper {
   width: 100%;
-}
+} */
