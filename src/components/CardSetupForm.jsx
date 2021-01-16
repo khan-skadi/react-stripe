@@ -4,6 +4,7 @@ import axios from 'axios';
 import SaveCard from './SaveCard';
 import './CardSetupForm.css';
 import Login from './Auth/Login';
+import UploadImage from './UploadImage';
 
 export const url =
   'http://localhost:5001/justdelvr-mobile-application-1/us-central1/api';
@@ -19,14 +20,16 @@ export default function CardSetupForm() {
   const [paymentIntentId, setPaymentIntentId] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [authenticated, setAuthenticated] = useState(false);
+  const [docRef, setDocRef] = useState(null);
+  const [uploadedImage, setUploadedImage] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       const secret = await fetchSetupIntent();
       setFetchedSecret(secret);
     };
-    fetchData();
-  }, []);
+    if (authenticated) fetchData();
+  }, [authenticated]);
 
   useEffect(() => {
     if (authenticated) {
@@ -164,7 +167,36 @@ export default function CardSetupForm() {
     });
     setAccount(data);
   };
-  
+
+  const handleOrderSubmit = async (e) => {
+    e.preventDefault();
+    const payload = {
+      items: [
+        {
+          description: 'item description',
+          image: uploadedImage,
+          size: 'Medium'
+        }
+      ],
+      imagesList: [uploadedImage],
+      userName: 'Hans Landa SS',
+      contactNumber: '+38972544622',
+      describe: 'Beautiful description',
+      collectionAddress: '5 Ginesi Ct, Edison, NJ, USA',
+      deliveryAddress: '123 Main St, Edison, NJ, USA',
+      transportMode: 1,
+      orderType: 1,
+      firstName: 'hans',
+      lastName: 'landa',
+      docId: docRef
+    };
+
+    const data = await axios.post(`${url}/quote/create`, payload);
+    console.log('submit order res: ', data);
+  };
+
+  console.log('docRef: ', docRef);
+  console.log('uploadedImage: ', uploadedImage);
   return (
     <div className="row">
       <div className="col-6">
@@ -219,6 +251,19 @@ export default function CardSetupForm() {
         <Login
           authenticated={authenticated}
           setAuthenticated={setAuthenticated}
+        />
+      </div>
+      <div className="col-12">
+        <button
+          onClick={handleOrderSubmit}
+          className="btn btn-secondary btn-lg"
+          type="submit"
+        >
+          Submit Form
+        </button>
+        <UploadImage
+          setDocRef={setDocRef}
+          setUploadedImage={setUploadedImage}
         />
       </div>
     </div>

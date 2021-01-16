@@ -4,7 +4,6 @@ import { Elements } from '@stripe/react-stripe-js';
 import CardSetupForm from './components/CardSetupForm';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Login from './components/Auth/Login';
 
 const stripePromise = loadStripe(
   'pk_test_51Hn4kXJbKhjF9mBLMk7eGbSMXNcxyIyEURgIDSgL3RDCkkr969Sifm8OSRzNnwsXiNI5H5AYAHQNdsuxqMblrYHE00zU6eghjV'
