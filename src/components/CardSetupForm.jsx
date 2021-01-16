@@ -3,6 +3,7 @@ import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import axios from 'axios';
 import SaveCard from './SaveCard';
 import './CardSetupForm.css';
+import Login from './Auth/Login';
 
 export const url =
   'http://localhost:5001/justdelvr-mobile-application-1/us-central1/api';
@@ -16,6 +17,8 @@ export default function CardSetupForm() {
   const [account, setAccount] = useState(null);
   const [verificationLink, setVerificationLink] = useState(null);
   const [paymentIntentId, setPaymentIntentId] = useState('');
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,6 +27,24 @@ export default function CardSetupForm() {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (authenticated) {
+      axios
+        .get(`${url}/auth`)
+        .then(
+          ({
+            data: {
+              data: { credentials }
+            }
+          }) => {
+            setCurrentUser(credentials);
+          }
+        )
+        .catch((err) => console.log(err));
+    }
+  }, [authenticated]);
+  console.log('currentUser: ', currentUser);
 
   const fetchSetupIntent = async () => {
     const {
@@ -61,34 +82,23 @@ export default function CardSetupForm() {
         amount: 50,
         couponValue: 10,
         couponIsPercentage: true,
-        receiptEmail: account.email
+        receiptEmail: account.email,
+        userId: currentUser.uid
       };
 
       const {
         data: { data }
-      } = await axios.post(
-        `${url}/payments/create-payment-intent`,
-        {
-          ...paymentIntentRequest
-        }
-      );
+      } = await axios.post(`${url}/payments/create-payment-intent`, {
+        ...paymentIntentRequest
+      });
       console.log('CREATE PAYMENT AND HOLD FUNDS: ', data);
 
-      const stripeCardId = data.paymentIntent.payment_method;
-      const stripeCardLast4 = data.paymentIntent.charges.data[0].payment_method_details.card.last4;
-      const stripeCustomerId = data.paymentIntent.customer;
-      console.log('stripeCardId: ', stripeCardId);
-      console.log('stripeCardLast4: ', stripeCardLast4);
-      console.log('stripeCustomerId: ', stripeCustomerId);
-      
       setPaymentIntent(data.paymentIntent);
       setPaymentIntentId(data.returnData.id);
     }
   };
 
   const handleCapturePayment = async () => {
-    console.log('connectedAccountId: ', account.id);
-    console.log('paymentIntentId: ', paymentIntentId);
     const {
       data: { data }
     } = await axios.post(`${url}/payments/capture-payment`, {
@@ -123,29 +133,25 @@ export default function CardSetupForm() {
 
     const {
       data: { data }
-    } = await axios.post(
-      `${url}/payments/create-individual-account`,
-      {
-        email: individualAccountParams.email,
-        individual: individualAccountParams
-      }
-    );
+    } = await axios.post(`${url}/payments/create-individual-account`, {
+      email: individualAccountParams.email,
+      individual: individualAccountParams
+    });
     setAccount(data.account);
   };
 
   const handleCreateAccountLinks = async () => {
     const {
       data: { data }
-    } = await axios.get(
-      `${url}/payments/create-account-links`,
-      {
-        params: {
-          accountId: account.id
-        }
+    } = await axios.get(`${url}/payments/create-account-links`, {
+      params: {
+        accountId: account.id
       }
-    );
+    });
     setVerificationLink(data.accountLinks.url);
-    // if (data.verificationLink.url !== '') window.location.href = data.verificationLink.url;
+
+    // if (data.accountLinks.url !== '')
+    //   window.location.href = data.accountLinks.url;
   };
 
   const handleRetrieveAccount = async () => {
@@ -153,53 +159,68 @@ export default function CardSetupForm() {
       data: { data }
     } = await axios.get(`${url}/payments/retrieve-account`, {
       params: {
-        accountId: account.id
+        accountId: 'acct_1I5wcCR5SnTQ4Q7i'
       }
     });
     setAccount(data);
   };
-
-  console.log('Account: ', account);
-  console.log('Links: ', verificationLink);
+  
   return (
-    <>
-      <button
-        onClick={handleCreateIndividualAccount}
-        className="connect--button"
-        disabled={!stripe}
-      >
-        Create Individual Account
-      </button>
-      <button
-        onClick={handleCreateAccountLinks}
-        className="connect--button"
-        disabled={!stripe}
-      >
-        Create Account Links
-      </button>
-      <button
-        onClick={handleRetrieveAccount}
-        className="connect--button"
-        disabled={!stripe}
-      >
-        Retrieve Account
-      </button>
+    <div className="row">
+      <div className="col-6">
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            flexDirection: 'column'
+          }}
+        >
+          <button
+            onClick={handleCreateIndividualAccount}
+            className="connect--button"
+            disabled={!stripe}
+          >
+            Create Individual Account
+          </button>
+          <button
+            onClick={handleCreateAccountLinks}
+            className="connect--button"
+            disabled={!stripe}
+          >
+            Create Account Links
+          </button>
+          <button
+            onClick={handleRetrieveAccount}
+            className="connect--button"
+            disabled={!stripe}
+          >
+            Retrieve Account
+          </button>
 
-      <form onSubmit={handleSubmit} className="form--wrapper">
-        <SaveCard />
+          <form onSubmit={handleSubmit} className="form--wrapper">
+            <SaveCard />
+            <button type="submit" className="charge--button" disabled={!stripe}>
+              Create payment intent and hold funds
+            </button>
+          </form>
 
-        <button type="submit" className="charge--button" disabled={!stripe}>
-          II - Create payment intent and hold funds
-        </button>
-      </form>
-
-      <button
-        onClick={handleCapturePayment}
-        className="capture--button"
-        disabled={!stripe}
-      >
-        Capture Payment
-      </button>
-    </>
+          <button
+            onClick={handleCapturePayment}
+            className="capture--button"
+            disabled={!stripe}
+          >
+            Capture Payment
+          </button>
+        </div>
+      </div>
+      <div className="col-6">
+        <Login
+          authenticated={authenticated}
+          setAuthenticated={setAuthenticated}
+        />
+      </div>
+    </div>
   );
 }

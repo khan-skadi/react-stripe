@@ -14,13 +14,10 @@ const App = () => {
   return (
     <div className="container">
       <div className="row">
-        <div className="col-6">
+        <div className="col-12">
           <Elements stripe={stripePromise}>
             <CardSetupForm />
           </Elements>
-        </div>
-        <div className="col-6">
-          <Login />
         </div>
       </div>
     </div>

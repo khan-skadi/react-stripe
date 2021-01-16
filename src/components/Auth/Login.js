@@ -2,15 +2,20 @@ import React from 'react';
 import axios from 'axios';
 import { url } from '../CardSetupForm';
 
-const Login = () => {
+const Login = ({ authenticated, setAuthenticated }) => {
   const handleLogin = async () => {
-    const { data: { data } } = await axios.post(`${url}/auth/login`, {
+    const {
+      data: { data }
+    } = await axios.post(`${url}/auth/login`, {
       email: 'kartalov.pt@gmail.com',
       password: 'test1234'
     });
     const token = data.token;
-    console.log('token: ', token);
+    const FBIdToken = `Bearer ${token}`;
     localStorage.setItem('access_token', token);
+    localStorage.setItem('FBIdToken', FBIdToken);
+    axios.defaults.headers.common['Authorization'] = FBIdToken;
+    setAuthenticated(true);
   };
 
   return (
@@ -25,7 +30,7 @@ const Login = () => {
           </button>
         </div>
         <div className="col-12 text-center mt-1">
-          <p className="h3">Logged in</p>
+          {authenticated ? <p className="h3">Logged In</p> : <p className="h3">Logged Out</p>}
         </div>
       </div>
     </div>
