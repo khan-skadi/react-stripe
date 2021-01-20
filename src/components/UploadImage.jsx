@@ -9,7 +9,6 @@ const UploadImage = ({ setDocRef, setUploadedImage }) => {
     formData.append("image", image, image.name);
     
     const { data: { data } } = await axios.post(`${url}/quote/upload`, formData);
-    console.log('UPLOAD DATA: ', data);
     setDocRef(data.doc);
     setUploadedImage(data.uploadedImage);
   }
